@@ -1,5 +1,5 @@
 <%@ page import="java.util.List" %>
-<%@ page import="com.tareg.onlineshopping.Product" %>
+<%@ page import="com.tareg.onlineshopping.model.Product" %>
 <!DOCTYPE html>
 <html>
 <head>

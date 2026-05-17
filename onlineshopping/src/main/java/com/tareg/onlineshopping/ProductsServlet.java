@@ -1,75 +1,104 @@
 package com.tareg.onlineshopping;
 
-import java.io.IOException;
-import java.math.BigDecimal;
+import com.tareg.onlineshopping.dao.ProductDAO;
+import com.tareg.onlineshopping.model.User;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.math.BigDecimal;
 
 /**
  * ProductsServlet - Enterprise Controller
- * Handles product listing and product creation using a JSP view.
+ * Requires a valid session. Delegates all DB work to ProductDAO.
  */
 public class ProductsServlet extends HttpServlet {
+
+    private final ProductDAO productDAO = new ProductDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        if (!isLoggedIn(request, response)) return;
         prepareView(request);
-        request.getRequestDispatcher("/products.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/products.jsp").forward(request, response);
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.setCharacterEncoding("UTF-8");
+        if (!isLoggedIn(request, response)) return;
 
-        String name = clean(request.getParameter("name"));
+        String action = clean(request.getParameter("action"));
+
+        if ("delete".equals(action)) {
+            long id = parseLong(request.getParameter("id"));
+            if (id > 0) productDAO.delete(id);
+            request.getSession().setAttribute("flashSuccess", "Product deleted.");
+            response.sendRedirect(request.getContextPath() + "/products");
+            return;
+        }
+
+        request.setCharacterEncoding("UTF-8");
+        String name        = clean(request.getParameter("name"));
         String description = clean(request.getParameter("description"));
-        String category = clean(request.getParameter("category"));
-        String priceText = clean(request.getParameter("price"));
-        String stockText = clean(request.getParameter("stock"));
+        String category    = clean(request.getParameter("category"));
+        String priceText   = clean(request.getParameter("price"));
+        String stockText   = clean(request.getParameter("stock"));
 
         setFormValues(request, name, description, category, priceText, stockText);
 
-        String validationError = validate(name, priceText, stockText);
-        if (validationError != null) {
-            request.setAttribute("errorMessage", validationError);
+        String error = validate(name, priceText, stockText);
+        if (error != null) {
+            request.setAttribute("errorMessage", error);
             prepareView(request);
-            request.getRequestDispatcher("/products.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/views/products.jsp").forward(request, response);
             return;
         }
 
         BigDecimal price = new BigDecimal(priceText);
         int stock = Integer.parseInt(stockText);
-        ProductCatalog.addProduct(name, description, category, price, stock);
+        productDAO.insert(name, description, category, price, stock);
 
         HttpSession session = request.getSession();
         session.setAttribute("flashSuccess", "Product '" + name + "' added successfully.");
         response.sendRedirect(request.getContextPath() + "/products");
     }
 
+    // -------------------------------------------------------------------------
+
+    private boolean isLoggedIn(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("loggedInUser") == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return false;
+        }
+        return true;
+    }
+
     private void prepareView(HttpServletRequest request) {
-        request.setAttribute("products", ProductCatalog.getProducts());
+        request.setAttribute("products", productDAO.findAll());
         HttpSession session = request.getSession(false);
         if (session != null) {
             Object success = session.getAttribute("flashSuccess");
-            Object error = session.getAttribute("flashError");
             if (success != null) {
                 request.setAttribute("successMessage", success);
                 session.removeAttribute("flashSuccess");
             }
-            if (error != null) {
-                request.setAttribute("errorMessage", error);
+            Object errorMsg = session.getAttribute("flashError");
+            if (errorMsg != null) {
+                request.setAttribute("errorMessage", errorMsg);
                 session.removeAttribute("flashError");
             }
         }
     }
 
-    private void setFormValues(HttpServletRequest request, String name, String description, String category, String priceText, String stockText) {
+    private void setFormValues(HttpServletRequest request, String name, String description,
+                               String category, String priceText, String stockText) {
         request.setAttribute("formName", name);
         request.setAttribute("formDescription", description);
         request.setAttribute("formCategory", category);
@@ -78,32 +107,21 @@ public class ProductsServlet extends HttpServlet {
     }
 
     private String validate(String name, String priceText, String stockText) {
-        if (name.length() == 0) {
-            return "Product name is required.";
-        }
-        if (priceText.length() == 0) {
-            return "Price is required.";
-        }
-        if (stockText.length() == 0) {
-            return "Stock quantity is required.";
-        }
+        if (name.isEmpty())      return "Product name is required.";
+        if (priceText.isEmpty()) return "Price is required.";
+        if (stockText.isEmpty()) return "Stock quantity is required.";
+        try { new BigDecimal(priceText); } catch (NumberFormatException e) { return "Price must be a valid number."; }
         try {
-            new BigDecimal(priceText);
-        } catch (NumberFormatException ex) {
-            return "Price must be a valid number.";
-        }
-        try {
-            int stock = Integer.parseInt(stockText);
-            if (stock < 0) {
-                return "Stock cannot be negative.";
-            }
-        } catch (NumberFormatException ex) {
-            return "Stock must be a valid whole number.";
-        }
+            int s = Integer.parseInt(stockText);
+            if (s < 0) return "Stock cannot be negative.";
+        } catch (NumberFormatException e) { return "Stock must be a whole number."; }
         return null;
     }
 
-    private String clean(String value) {
-        return value == null ? "" : value.trim();
+    private String clean(String v) { return v == null ? "" : v.trim(); }
+
+    private long parseLong(String v) {
+        try { return v == null ? 0 : Long.parseLong(v.trim()); }
+        catch (NumberFormatException e) { return 0; }
     }
 }
