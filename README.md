@@ -25,15 +25,17 @@ Wait for "BUILD SUCCESS" message.
 ```
 mvn tomcat7:run
 ```
-Wait for message: `INFO [main] org.apache.catalina.startup.Catalina.start Server startup`
+Wait for the startup message, then open the browser.
 
-### Step 5: Open your browser and visit
-- **Home page:** http://localhost:8080/onlineshopping/
-- **Servlet endpoint:** http://localhost:8080/onlineshopping/hello
+### Step 5: Open the app
+- **Home:** http://localhost:8080/onlineshopping/
+- **Products page:** http://localhost:8080/onlineshopping/products
+- **API test:** http://localhost:8080/onlineshopping/hello
 
-You should see: `Hello from servlet without installing Tomcat!`
+### Step 6: Use the real-time products form
+On `/products`, you can add a new product using POST. The catalog refreshes immediately.
 
-### Step 6: Stop the server
+### Step 7: Stop the server
 In the command prompt window, press **`Ctrl + C`**
 
 ---
@@ -46,4 +48,42 @@ mvn clean package
 mvn tomcat7:run
 ```
 
-Then open browser to: `http://localhost:8080/onlineshopping/hello`
+Then open browser to:
+- `http://localhost:8080/onlineshopping/products`
+- `http://localhost:8080/onlineshopping/hello`
+
+---
+
+## Run on your local Tomcat 9 service at port 9090
+
+If you want to use the installed Tomcat service (`Tomcat9`) instead of Maven embedded Tomcat:
+
+### Step 1: Build the WAR
+```powershell
+cd D:\servlet-app\online-shopping\onlineshopping
+mvn clean package
+```
+
+### Step 2: Copy the WAR to Tomcat 9
+```powershell
+Copy-Item .\target\onlineshopping.war "C:\Program Files\Apache Software Foundation\Tomcat 9.0\webapps\" -Force
+```
+
+### Step 3: Remove old exploded deployment if it exists
+```powershell
+Remove-Item "C:\Program Files\Apache Software Foundation\Tomcat 9.0\webapps\onlineshopping" -Recurse -Force -ErrorAction SilentlyContinue
+```
+
+### Step 4: Restart Tomcat 9
+```powershell
+Restart-Service Tomcat9
+```
+
+### Step 5: Open the app
+- Home: `http://localhost:9090/onlineshopping/`
+- Products: `http://localhost:9090/onlineshopping/products`
+
+### If the form still does not appear
+- Hard refresh the browser with `Ctrl + F5`
+- Check Tomcat logs in `C:\Program Files\Apache Software Foundation\Tomcat 9.0\logs`
+- Make sure you are opening `/onlineshopping/products`, not just `/products`

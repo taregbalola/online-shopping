@@ -45,6 +45,13 @@ WAR output:
 Manual deployment idea (external Tomcat):
 - Copy WAR into `<TOMCAT_HOME>\webapps\`
 
+ Tomcat 9 service on `9090`:
+```powershell
+Copy-Item D:\servlet-app\online-shopping\onlineshopping\target\onlineshopping.war "C:\Program Files\Apache Software Foundation\Tomcat 9.0\webapps\" -Force
+Remove-Item "C:\Program Files\Apache Software Foundation\Tomcat 9.0\webapps\onlineshopping" -Recurse -Force -ErrorAction SilentlyContinue
+Restart-Service Tomcat9
+```
+
 ## 4) How do you check Tomcat logs?
 For embedded plugin here, logs are under target:
 - `onlineshopping\target\tomcat\logs\`
