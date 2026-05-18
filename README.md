@@ -48,6 +48,37 @@ mvn clean package
 mvn tomcat7:run
 ```
 
+### If `mvn clean package` fails because `target\tomcat\logs\access_log...` is locked
+
+This happens when `mvn tomcat7:run` is still running and keeping the embedded Tomcat log file open.
+
+Find the process:
+
+```powershell
+Get-CimInstance Win32_Process |
+  Where-Object { $_.Name -eq 'java.exe' -and $_.CommandLine -match 'tomcat7:run' } |
+  Select-Object ProcessId, CommandLine | Format-List
+```
+
+Stop it:
+
+```powershell
+Stop-Process -Id <PID> -Force
+```
+
+Then build again:
+
+```powershell
+cd D:\servlet-app\online-shopping\onlineshopping
+mvn clean package
+```
+
+If you only need a new WAR and do not need `clean`, you can also use:
+
+```powershell
+mvn package
+```
+
 Then open browser to:
 - `http://localhost:8080/onlineshopping/products`
 - `http://localhost:8080/onlineshopping/hello`
@@ -110,4 +141,43 @@ Then run SQL from `src/main/webapp/WEB-INF/db/schema.sql` in phpMyAdmin (or MySQ
 ### Jasper Invoice PDF
 - Open `Orders` page, then click `Download Invoice PDF` on any order card.
 - Direct URL pattern: `http://localhost:9090/onlineshopping/invoice?orderId=1`
+
+---
+
+## SOAP Service (Enterprise Integration)
+
+This project now includes a SOAP endpoint for external enterprise systems such as ERP, CRM, ESB, or legacy .NET/Java integrations.
+
+### Why SOAP may be needed
+- Stable contract with WSDL
+- Strong XML schema validation
+- Common in older enterprise systems and vendor integrations
+- Good when another team wants a formal contract instead of HTML/JSP pages
+
+### WSDL URL
+- Local Tomcat 9090: `http://localhost:9090/onlineshopping/product-catalog?wsdl`
+- Maven Tomcat 8080: `http://localhost:8080/onlineshopping/product-catalog?wsdl`
+
+### SOAP operations
+- `ping()`
+- `getProductById(id)`
+- `getAllProducts()`
+
+### PowerShell test example
+```powershell
+Invoke-WebRequest -UseBasicParsing "http://localhost:9090/onlineshopping/product-catalog?wsdl" | Select-Object -ExpandProperty StatusCode
+```
+
+### Sample SOAP request body
+```xml
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+				  xmlns:tns="http://soap.onlineshopping.tareg.com/">
+  <soapenv:Header/>
+  <soapenv:Body>
+	<tns:getProductById>
+	  <id>1</id>
+	</tns:getProductById>
+  </soapenv:Body>
+</soapenv:Envelope>
+```
 
