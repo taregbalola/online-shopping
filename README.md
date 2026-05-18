@@ -87,3 +87,27 @@ Restart-Service Tomcat9
 - Hard refresh the browser with `Ctrl + F5`
 - Check Tomcat logs in `C:\Program Files\Apache Software Foundation\Tomcat 9.0\logs`
 - Make sure you are opening `/onlineshopping/products`, not just `/products`
+
+---
+
+## New Enterprise Features (Cart + Address Book + Reports)
+
+After updating code, run the DB script again so new tables are created:
+
+```powershell
+cd D:\servlet-app\online-shopping\onlineshopping
+mvn clean package
+```
+
+Then run SQL from `src/main/webapp/WEB-INF/db/schema.sql` in phpMyAdmin (or MySQL CLI).
+
+### Main URLs
+- Products: `http://localhost:9090/onlineshopping/products`
+- Cart + Address Book + Checkout: `http://localhost:9090/onlineshopping/cart`
+- Orders: `http://localhost:9090/onlineshopping/orders`
+- Reports (admin only): `http://localhost:9090/onlineshopping/reports`
+
+### Jasper Invoice PDF
+- Open `Orders` page, then click `Download Invoice PDF` on any order card.
+- Direct URL pattern: `http://localhost:9090/onlineshopping/invoice?orderId=1`
+

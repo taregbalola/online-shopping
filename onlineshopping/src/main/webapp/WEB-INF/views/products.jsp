@@ -52,6 +52,10 @@
         .pill.price { background: #f0fdf4; color: #15803d; }
         .pill.stock-low { background: #fef9c3; color: #854d0e; }
         .small { font-size: 0.87rem; color: #9ca3af; }
+        .buy-form { margin-top: 0.6rem; padding-top: 0.6rem; border-top: 1px dashed #d1d5db; display: flex; gap: 0.45rem; align-items: center; }
+        .buy-form input { padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 6px; width: 90px; }
+        .btn-buy { border: none; background: #059669; color: white; padding: 0.55rem 0.9rem; border-radius: 6px; cursor: pointer; }
+        .btn-buy:hover { background: #047857; }
         footer { background-color: #333; color: white; text-align: center; padding: 1.5rem; margin-top: 3rem; }
         footer a { color: #667eea; text-decoration: none; }
         @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
@@ -97,6 +101,9 @@
 <nav>
     <a href="index.jsp">Home</a>
     <a href="products">Products</a>
+    <a href="cart">Cart</a>
+    <a href="orders">Orders</a>
+    <% if (currentUser != null && currentUser.isAdmin()) { %><a href="reports">Reports</a><% } %>
     <a href="about">About Us</a>
     <a href="contact">Contact</a>
     <a href="hello">API</a>
@@ -178,6 +185,12 @@
                             </span>
                         </div>
                         <p class="small">Created: <%= p.getCreatedAt() %></p>
+                        <form method="post" action="cart" class="buy-form">
+                            <input type="hidden" name="action" value="add">
+                            <input type="hidden" name="productId" value="<%= p.getId() %>">
+                            <input type="number" name="quantity" min="1" max="50" value="1" required>
+                            <button type="submit" class="btn-buy">Add to Cart</button>
+                        </form>
                     </div>
                 <% } } else { %>
                     <p style="color:#888;">No products found. Add one using the form.</p>

@@ -41,6 +41,26 @@
     <servlet-class>com.tareg.onlineshopping.ContactServlet</servlet-class>
   </servlet>
 
+  <servlet>
+    <servlet-name>OrderServlet</servlet-name>
+    <servlet-class>com.tareg.onlineshopping.OrderServlet</servlet-class>
+  </servlet>
+
+  <servlet>
+    <servlet-name>CartServlet</servlet-name>
+    <servlet-class>com.tareg.onlineshopping.CartServlet</servlet-class>
+  </servlet>
+
+  <servlet>
+    <servlet-name>AdminReportServlet</servlet-name>
+    <servlet-class>com.tareg.onlineshopping.AdminReportServlet</servlet-class>
+  </servlet>
+
+  <servlet>
+    <servlet-name>InvoicePdfServlet</servlet-name>
+    <servlet-class>com.tareg.onlineshopping.InvoicePdfServlet</servlet-class>
+  </servlet>
+
   <!-- ===== Mappings ===== -->
   <servlet-mapping>
     <servlet-name>SetupServlet</servlet-name>
@@ -75,6 +95,26 @@
   <servlet-mapping>
     <servlet-name>ContactServlet</servlet-name>
     <url-pattern>/contact</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>OrderServlet</servlet-name>
+    <url-pattern>/orders</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>CartServlet</servlet-name>
+    <url-pattern>/cart</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>AdminReportServlet</servlet-name>
+    <url-pattern>/reports</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>InvoicePdfServlet</servlet-name>
+    <url-pattern>/invoice</url-pattern>
   </servlet-mapping>
 
   <!-- Default page -->
